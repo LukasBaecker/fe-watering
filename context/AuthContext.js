@@ -1,40 +1,17 @@
-import React, { createContext, useState } from "react";
-import * as Keychain from "react-native-keychain";
+import React, { useState, createContext } from "react";
+import * as SecureStore from "expo-secure-store";
 
-const AuthContext = createContext({});
-const { Provider } = AuthContext;
+export const AuthContext = createContext();
 
-const AuthProvider = ({ children }) => {
+export const AuthProvider = (props) => {
   const [authState, setAuthState] = useState({
-    accessToken: false,
-    refreshToken: false,
+    accessToken: "",
+    refreshToken: "",
     authenticated: false,
   });
-
-  const logout = async () => {
-    await Keychain.resetGenericPassword();
-    setAuthState({
-      accessToken: false,
-      refreshToken: false,
-      authenticated: false,
-    });
-  };
-
-  const getAccessToken = () => {
-    return authState.accessToken;
-  };
-
   return (
-    <Provider
-      value={{
-        authState,
-        getAccessToken,
-        setAuthState,
-        logout,
-      }}>
-      {children}
-    </Provider>
+    <AuthContext.Provider value={[authState, setAuthState]}>
+      {props.children}
+    </AuthContext.Provider>
   );
 };
-
-export { AuthContext, AuthProvider };

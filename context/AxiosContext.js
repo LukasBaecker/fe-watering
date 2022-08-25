@@ -2,26 +2,24 @@ import React, { createContext, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "./AuthContext";
 import createAuthRefreshInterceptor from "axios-auth-refresh";
-import * as Keychain from "react-native-keychain";
+import * as SecureStore from "expo-secure-store";
 
-const AxiosContext = createContext();
-const { Provider } = AxiosContext;
+export const AxiosContext = createContext();
 
-const AxiosProvider = ({ children }) => {
-  const authContext = useContext(AuthContext);
-
+export const AxiosProvider = (props) => {
+  const [authState, setAuthState] = useContext(AuthContext);
   const authAxios = axios.create({
-    baseURL: "http://localhost:8000/api/v1",
+    baseURL: "http://172.30.235.197:8000/api/v1",
   });
 
   const publicAxios = axios.create({
-    baseURL: "http://localhost:8000/api/v1",
+    baseURL: "http://172.30.235.197:8000/api/v1",
   });
 
   authAxios.interceptors.request.use(
     (config) => {
       if (!config.headers.Authorization) {
-        config.headers.Authorization = `Bearer ${authContext.getAccessToken()}`;
+        config.headers.Authorization = `Bearer ${authState.accessToken}`;
       }
 
       return config;
@@ -33,39 +31,38 @@ const AxiosProvider = ({ children }) => {
 
   const refreshAuthLogic = (failedRequest) => {
     const data = {
-      refreshToken: authContext.authState.refreshToken,
+      refreshToken: authState.refreshToken,
     };
 
     const options = {
       method: "POST",
       data,
-      url: "http://localhost:8000/api/v1/refreshToken",
+      url: "http://172.30.235.197:8000/api/v1/user/refreshToken",
     };
 
     return axios(options)
       .then(async (tokenRefreshResponse) => {
         failedRequest.response.config.headers.Authorization =
           "Bearer " + tokenRefreshResponse.data.accessToken;
-
-        authContext.setAuthState({
-          ...authContext.authState,
+        setAuthState({
+          ...authState,
           accessToken: tokenRefreshResponse.data.accessToken,
         });
 
-        await Keychain.setGenericPassword(
-          "token",
+        await SecureStore.setItemAsync(
+          "tokens",
           JSON.stringify({
             accessToken: tokenRefreshResponse.data.accessToken,
-            refreshToken: authContext.authState.refreshToken,
+            refreshToken: authState.refreshToken,
           })
         );
-
         return Promise.resolve();
       })
       .catch((e) => {
-        authContext.setAuthState({
-          accessToken: false,
-          refreshToken: false,
+        setAuthState({
+          accessToken: "",
+          refreshToken: "",
+          authenticated: false,
         });
       });
   };
@@ -73,14 +70,8 @@ const AxiosProvider = ({ children }) => {
   createAuthRefreshInterceptor(authAxios, refreshAuthLogic, {});
 
   return (
-    <Provider
-      value={{
-        authAxios,
-        publicAxios,
-      }}>
-      {children}
-    </Provider>
+    <AxiosContext.Provider value={{ authAxios, publicAxios }}>
+      {props.children}
+    </AxiosContext.Provider>
   );
 };
-
-export { AxiosContext, AxiosProvider };
