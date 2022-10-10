@@ -12,3 +12,6 @@ web-build/
 
 # macOS
 .DS_Store
+
+#ignore the firebase-config because of the app config information
+./firebase-config.js
