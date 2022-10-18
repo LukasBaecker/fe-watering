@@ -1,110 +1,136 @@
-import { useNavigation } from "@react-navigation/core";
-import React, { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
+  TouchableHighlight,
   View,
+  SafeAreaView,
+  Button,
+  Alert,
 } from "react-native";
+import React, { useContext, useState } from "react";
+import { AuthContext } from "../context/AuthContext";
+import * as SecureStore from "expo-secure-store";
+import { highlightColor, primaryColor } from "../styles/colors";
+import { auth } from "../firebase-config";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
-const RegisterScreen = () => {
+const RegisterScreen = (props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [authState, setAuthState] = useContext(AuthContext);
 
-  const navigation = useNavigation();
+  const handleRegister = async () => {
+    try {
+      createUserWithEmailAndPassword(auth, email, password).then(
+        (userCredential) => {
+          //const user = userCredential.user;
+          //console.log(user.email);
+          setAuthState({ auth: true, user: {} });
+        }
+      );
+      /*
+      const response = await publicAxios.post("/user/login", {
+        email,
+        password,
+      });
+      console.log(response.data);
+      const { accessToken, refreshToken } = response.data;
+      console.log(authState);
+      //saving the tokens to the secured store
+      await SecureStore.setItemAsync(
+        "tokens",
+        JSON.stringify({
+          accessToken,
+          refreshToken,
+        })
+      );
+      //saving the tokens in context context
 
-  useEffect(() => {
-    //const unsubscribe = auth.onAuthStateChanged(user => {
-    //if (user) {
-    // navigation.replace("Home")
-    // }
-    // })
-    //return unsubscribe
-  }, []);
-
-  const handleSignUp = () => {};
-
-  const handleLogin = () => {};
-
+      setAuthState({
+        accessToken: JSON.stringify(accessToken),
+        refreshToken: JSON.stringify(refreshToken),
+        authenticated: true,
+      });*/
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Register Failed", error);
+      //Alert.alert("Login Failed", error.response.data.message);
+    }
+  };
   return (
-    <KeyboardAvoidingView style={styles.container}>
-      <View style={styles.inputContainer}>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.logo}>Registrieren</Text>
+      <View style={styles.form}>
         <TextInput
+          style={styles.input}
           placeholder='Email'
-          value={email}
+          placeholderTextColor='#fefefe'
+          keyboardType='email-address'
+          autoCapitalize='none'
           onChangeText={(text) => setEmail(text)}
-          style={styles.input}
+          value={email}
         />
+
         <TextInput
-          placeholder='Password'
-          value={password}
-          onChangeText={(text) => setPassword(text)}
           style={styles.input}
+          placeholder='Password'
+          placeholderTextColor='#fefefe'
           secureTextEntry
+          onChangeText={(text) => setPassword(text)}
+          value={password}
         />
       </View>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={handleLogin} style={styles.button}>
-          <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={handleSignUp}
-          style={[styles.button, styles.buttonOutline]}>
-          <Text style={styles.buttonOutlineText}>Register</Text>
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+      <TouchableHighlight
+        onPress={() => {
+          props.navigation.navigate("Login");
+        }}>
+        <Text style={styles.link}>Bereits registriert? Jetzt anmelden!</Text>
+      </TouchableHighlight>
+      <Button
+        color={highlightColor}
+        title='Registrieren'
+        style={styles.button}
+        onPress={() => handleRegister()}
+      />
+    </SafeAreaView>
   );
 };
-
-export default RegisterScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+    backgroundColor: primaryColor,
     alignItems: "center",
+    justifyContent: "flex-start",
+    width: "100%",
   },
-  inputContainer: {
+  link: {
+    marginBottom: 10,
+    color: "#fff",
+    textDecorationLine: "underline",
+  },
+  logo: {
+    fontSize: 60,
+    color: "#fff",
+    marginTop: "20%",
+    marginBottom: "20%",
+  },
+  form: {
     width: "80%",
+    margin: "10%",
   },
   input: {
-    backgroundColor: "white",
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 10,
-    marginTop: 5,
+    fontSize: 20,
+    color: "#fff",
+    paddingBottom: 10,
+    borderBottomColor: "#fff",
+    borderBottomWidth: 1,
+    marginVertical: 20,
   },
-  buttonContainer: {
-    width: "60%",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 40,
-  },
-  button: {
-    backgroundColor: "#0782F9",
-    width: "100%",
-    padding: 15,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  buttonOutline: {
-    backgroundColor: "white",
-    marginTop: 5,
-    borderColor: "#0782F9",
-    borderWidth: 2,
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "700",
-    fontSize: 16,
-  },
-  buttonOutlineText: {
-    color: "#0782F9",
-    fontWeight: "700",
-    fontSize: 16,
-  },
+  button: { backgroundColor: highlightColor },
 });
+
+export default RegisterScreen;
