@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from "react-native";
-import { Agenda, Calendar } from "react-native-calendars";
+import { Agenda, Calendar, CalendarList } from "react-native-calendars";
+import { formatDate } from "../helpers/formateDate";
 const CalenderScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
@@ -40,7 +41,7 @@ const CalenderScreen = () => {
           console.log("day changed");
         }}
         // Initially selected day
-        selected={"2022-10-16"}
+        selected={formatDate(Date())}
         // Minimum date that can be selected, dates before minDate will be grayed out. Default = undefined
         minDate={"2022-10-10"}
         // Maximum date that can be selected, dates after maxDate will be grayed out. Default = undefined

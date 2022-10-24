@@ -1,6 +1,6 @@
 import { SET_USER } from "../actions/user.js";
 
-const initialState = {name:null};
+const initialState = { auth: {}, data: {}, gardens: [] };
 
 const userReducer = (state = initialState, action) => {
   switch (action.type) {

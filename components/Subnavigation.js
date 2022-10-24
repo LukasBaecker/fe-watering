@@ -9,6 +9,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 //import Dashboard from './src/components/Dashboard';
 import Spinner from "./Spinner";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"; //icons for Tab-Nav
+import { highlightColor, primaryColor } from "../styles/colors";
 //Auth Screens
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
@@ -17,7 +18,7 @@ import ResetPasswordScreen from "../screens/ResetPasswordScreen";
 import HomeScreen from "../screens/HomeScreen";
 import UserScreen from "../screens/UserScreen";
 import GardenScreen from "../screens/GardenScreen";
-import CalendarScreen from "../screens/CalendarScreen";
+import CalendarScreen from "../screens/CalendarScreen.tsx";
 
 export default Subnavigation = (props) => {
   const Tab = createBottomTabNavigator();
@@ -33,12 +34,18 @@ export default Subnavigation = (props) => {
     },
   };
   return (
-    <Tab.Navigator>
+    <Tab.Navigator
+      screenOptions={{
+        tabBarStyle: { backgroundColor: primaryColor },
+        tabBarInactiveTintColor: "#ffffff",
+        tabBarActiveTintColor: highlightColor,
+      }}>
       <Tab.Screen
         name='Home'
         component={HomeScreen}
         options={{
           ...headerStyle,
+          headerShown: false,
           tabBarLabel: "Home",
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name='home' color={color} size={size} />
@@ -51,6 +58,7 @@ export default Subnavigation = (props) => {
         options={{
           headerShown: false,
           ...headerStyle,
+          headerShown: false,
           tabBarLabel: "Kalender",
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
@@ -66,6 +74,7 @@ export default Subnavigation = (props) => {
         component={GardenScreen}
         options={{
           ...headerStyle,
+          headerShown: false,
           tabBarLabel: "Gärten",
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons

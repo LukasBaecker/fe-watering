@@ -17,73 +17,16 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase-config";
 import Spinner from "../components/Spinner";
 import { highlightColor } from "../styles/colors";
-const LoginScreen = (props) => {
+const NewGardenScreen = (props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [authState, setAuthState] = useContext(AuthContext);
   const [status, setStatus] = useState("idle");
-  const onLogin = async () => {
-    try {
-      setStatus("loading");
-      signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          const user = userCredential.user;
-          console.log(user);
-          setAuthState({ auth: true, user: {} });
-          setStatus("idle");
-        })
-        .catch((err) => {
-          setStatus("idle");
-          if (err.message === "Firebase: Error (auth/wrong-password).") {
-            Alert.alert("Login fehlgeschlagen: Falsches Passwort!");
-          } else {
-            if (err.message === "Firebase: Error (auth/user-not-found).") {
-              Alert.alert("E-Mail Adresse ist nicht registriert.");
-            } else {
-              console.log("this is the error ", err);
-              Alert.alert("Login fehlgeschlagen");
-            }
-          }
-        });
 
-      /*
-      const response = await publicAxios.post("/user/login", {
-        email,
-        password,
-      });
-      console.log(response.data);
-      const { accessToken, refreshToken } = response.data;
-      console.log(authState);
-      //saving the tokens to the secured store
-      await SecureStore.setItemAsync(
-        "tokens",
-        JSON.stringify({
-          accessToken,
-          refreshToken,
-        })
-      );
-      //saving the tokens in context context
-
-      setAuthState({
-        accessToken: JSON.stringify(accessToken),
-        refreshToken: JSON.stringify(refreshToken),
-        authenticated: true,
-      });*/
-    } catch (error) {
-      console.log(error);
-      //const errorCode = error.code;
-      const errorMessage = error.message;
-      Alert.alert("Login Failed: ", error.message);
-      //Alert.alert("Login Failed", error.response.data.message);
-    }
-  };
-
-  if (status === "loading") {
-    return <Spinner />;
-  }
+  const createNewGarden = () => {};
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.logo}>Login</Text>
+      <Text style={styles.logo}>Neuen Garten anlegen</Text>
       <View style={styles.form}>
         <TextInput
           style={styles.input}
@@ -108,16 +51,12 @@ const LoginScreen = (props) => {
       <TouchableHighlight
         onPress={() => {
           props.navigation.navigate("Register");
-        }}>
-        <Text style={styles.link}>
-          Noch keinen Account? Jetzt registrieren!
-        </Text>
-      </TouchableHighlight>
+        }}></TouchableHighlight>
       <Button
         color={highlightColor}
-        title='Login'
+        title='Erstellen'
         style={styles.button}
-        onPress={() => onLogin()}
+        onPress={() => createNewGarden()}
       />
     </SafeAreaView>
   );
@@ -156,4 +95,4 @@ const styles = StyleSheet.create({
   button: {},
 });
 
-export default LoginScreen;
+export default NewGardenScreen;

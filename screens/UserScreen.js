@@ -3,6 +3,7 @@ import { AuthContext } from "../context/AuthContext";
 import Spinner from "../components/Spinner";
 import {
   Button,
+  Alert,
   Image,
   StyleSheet,
   SafeAreaView,
@@ -16,10 +17,28 @@ import {
 import * as SecureStore from "expo-secure-store";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase-config";
+import { dangerColor, primaryDarkColor } from "../styles/colors";
 const UserScreen = () => {
   const [authState, setAuthState] = useContext(AuthContext);
   const [image, setImage] = useState("");
   const [status, setStatus] = useState("idle");
+
+  const logoutAlert = () => {
+    Alert.alert("Wirklich ausloggen?", "", [
+      {
+        text: "Abbrechen",
+        onPress: () => {},
+        style: "cancel",
+      },
+      {
+        text: "Ausloggen",
+        onPress: () => {
+          logout();
+        },
+      },
+    ]);
+  };
+
   const logout = async () => {
     setStatus("loading");
     /*await SecureStore.setItemAsync(
@@ -30,7 +49,7 @@ const UserScreen = () => {
       })
     );*/
     signOut(auth).then((response) => {
-      setAuthState({auth: false, user:{}});
+      setAuthState({ auth: false, user: {} });
       setStatus("idle");
     });
   };
@@ -47,18 +66,17 @@ const UserScreen = () => {
   }
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text>Profil</Text>
-      </View>
       <View style={styles.content}>
-        <View style={styles.placeholder}></View>
-        <View style={styles.buttonGroup}>
-          <TouchableOpacity
-            onPress={() => logout()}
-            style={{ ...styles.button, ...styles.logoutButton }}>
-            <Text style={styles.buttonText}>Logout</Text>
-          </TouchableOpacity>
+        <View style={styles.placeholder}>
+          <Text>placeholder</Text>
         </View>
+        <TouchableOpacity style={styles.logoutbutton}>
+          <Button
+            color={dangerColor}
+            title='Logout'
+            onPress={() => logoutAlert()}
+          />
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -73,30 +91,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffff55",
     //marginBottom: 100,
   },
-  header: {
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-    flex: 1,
-    backgroundColor: "#ff44ff",
-  },
   content: {
     flex: 11,
-    backgroundColor: "grey",
-  },
-  button: {
-    backgroundColor: "#0782F9",
-    width: "100%",
-    height: "90%",
-    padding: 15,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  logoutButton: {
-    backgroundColor: "#ff7755",
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "700",
-    fontSize: 16,
+    backgroundColor: primaryDarkColor,
   },
   image: {
     width: "200px",
@@ -106,14 +103,8 @@ const styles = StyleSheet.create({
   placeholder: {
     flex: 11,
   },
-  buttonGroup: {
+  logoutbutton: {
     flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    paddingLeft: "10%",
-    paddingRight: "10%",
-    paddingBottom: "1%",
-    paddingTop: "1%",
+    padding: 15,
   },
 });

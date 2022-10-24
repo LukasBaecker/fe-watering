@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   link: {
-    marginBottom: 10,
+    marginBottom: 30,
     color: "#fff",
     textDecorationLine: "underline",
   },
@@ -130,7 +130,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     marginVertical: 20,
   },
-  button: { backgroundColor: highlightColor },
 });
 
 export default RegisterScreen;
