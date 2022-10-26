@@ -1,6 +1,6 @@
 import { SET_GARDEN } from "../actions/garden.js";
 
-const initialState = {};
+const initialState = { garden: {}, myRole: "none" };
 
 const gardenReducer = (state = initialState, action) => {
   switch (action.type) {

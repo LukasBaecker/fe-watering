@@ -1,8 +1,9 @@
 import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { highlightColor } from "../styles/colors";
 
 const Spinner = () => (
   <View style={styles.container}>
-    <ActivityIndicator size='large' color='#007aff' />
+    <ActivityIndicator size='large' color={highlightColor} />
   </View>
 );
 

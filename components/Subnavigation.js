@@ -6,7 +6,6 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import * as SecureStore from "expo-secure-store";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-//import Dashboard from './src/components/Dashboard';
 import Spinner from "./Spinner";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"; //icons for Tab-Nav
 import { highlightColor, primaryColor } from "../styles/colors";
@@ -19,8 +18,11 @@ import HomeScreen from "../screens/HomeScreen";
 import UserScreen from "../screens/UserScreen";
 import GardenScreen from "../screens/GardenScreen";
 import CalendarScreen from "../screens/CalendarScreen.tsx";
-
+import { useDispatch, useSelector } from "react-redux";
+import { setGarden } from "../store/actions/garden";
 export default Subnavigation = (props) => {
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
   const Tab = createBottomTabNavigator();
   const headerStyle = {
     headerTintColor: "#ffffff",
@@ -33,6 +35,23 @@ export default Subnavigation = (props) => {
       fontSize: 18,
     },
   };
+
+  useEffect(() => {
+    //TODO: HIER MUSS ZUGRIFF AUF DIE PROPS ERLANGT WERDEN
+    //TODO: oder ich finde eine Möglichkeit, wenn ein neuer Garten ausgewählt wird soll dieser
+    //in den redux store dispatched werden
+    //TODO: und daraufhin soll hier dann geschaut werden ob user "owner" oder "admin" ist
+    // und dann werden die join Requests geladen
+    if (props.garden) {
+      console.log("props.garden:", props.garden);
+      const findRole = props.garden.roles[user.auth.uid];
+      dispatch(setGarden({ garden: props.garden, myRole: findRole }));
+    } else {
+      console.log("goes here");
+      dispatch(setGarden({ garden: {}, myRole: "none" }));
+    }
+  }, [props.garden]);
+
   return (
     <Tab.Navigator
       screenOptions={{

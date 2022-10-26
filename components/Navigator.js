@@ -35,6 +35,8 @@ const auth = getAuth(app);
 import { useSelector, useDispatch } from "react-redux";
 import { setUser } from "../store/actions/user";
 import CustomDrawer from "./CustomDrawer";
+import CreateGarden from "../screens/CreateGardenScreen";
+import SearchGarden from "../screens/SearchGardenScreen";
 
 //create the Navigators
 const Stack = createNativeStackNavigator();
@@ -48,25 +50,13 @@ export default function Navigator() {
   const [status, setStatus] = useState("loading");
   //const [user, setUser] = useState({ name: null });
 
-  const gardenListExample = [
-    { name: "garden1", description: "testthis" },
-    { name: "garden2", description: "this is the test for garden2" },
-    { name: "garden3", description: "This one here is garden number 3" },
-    { name: "garden4", description: "testthis" },
-    { name: "garden5", description: "this is the test for garden2" },
-    { name: "garden6", description: "This one here is garden number 3" },
-    { name: "garden7", description: "testthis" },
-    { name: "garden8", description: "this is the test for garden2" },
-    { name: "garden9", description: "This one here is garden number 3" },
-  ];
-
   const onAuthStateChange = (callback) => {
     setStatus("loading");
     return onAuthStateChanged(auth, (u) => {
       if (u) {
         const docRef = doc(db, "user", u.uid);
         getDoc(docRef).then((additionalUser) => {
-          dispatch(callback({ ...user, auth: u, data: additionalUser.data() }));
+          //dispatch(callback({ ...user, auth: u, data: additionalUser.data() }));
           const gardenList = additionalUser.data().gardens;
           const q = query(
             collection(db, "gardens"),
@@ -80,10 +70,14 @@ export default function Navigator() {
                 description: g.data().description,
                 roles: g.data().roles,
               });
-              console.log("g.data():", g.data());
-              console.log("gardenArr:", gardenArr);
             });
-            dispatch(callback({ ...user, gardens: gardenArr }));
+            dispatch(
+              callback({
+                auth: u,
+                data: additionalUser.data(),
+                gardens: gardenArr,
+              })
+            );
             setStatus("idle");
 
             /* gardens.forEach((g) => {
@@ -115,15 +109,7 @@ export default function Navigator() {
   if (status === "loading") {
     return <Spinner />;
   }
-  const headerStyle = {
-    headerTintColor: "#ffffff",
-    headerStyle: {
-      backgroundColor: primaryDarkColor,
-    },
-    headerTitleStyle: {
-      fontSize: 18,
-    },
-  };
+
   return (
     <NavigationContainer>
       {!authState.auth || authState.auth !== true ? (
@@ -148,35 +134,23 @@ export default function Navigator() {
         </>
       ) : (
         <>
-          <Drawer.Navigator
-            initialRouteName='Home'
-            drawerContent={(props) => <CustomDrawer {...props} />}
-            screenOptions={{
-              drawerActiveBackgroundColor: highlightColor,
-              drawerActiveTintColor: "#fff",
-            }}>
-            {user.gardens.map((garden) => {
-              return (
-                <Drawer.Screen
-                  key={garden.name}
-                  name={garden.name}
-                  component={Subnavigation}
-                  options={{
-                    ...headerStyle,
-                  }}
-                  initialParams={{ garden: garden }}></Drawer.Screen>
-              );
-            })}
-            <Drawer.Screen
-              key={"addNewGarden"}
-              name={"neuen Garten anlegen"}
-              component={Subnavigation}
-              style={styles.addGardenButton}
-              options={{
-                ...headerStyle,
-              }}
+          <Stack.Navigator>
+            <Stack.Screen
+              options={{ headerShown: false }}
+              name='Drawer'
+              component={DrawerNavigation}
             />
-          </Drawer.Navigator>
+            <Stack.Screen
+              name='SearchGarden'
+              component={SearchGarden}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name='CreateGarden'
+              component={CreateGarden}
+              options={{ headerShown: false }}
+            />
+          </Stack.Navigator>
         </>
       )}
       {/*TODO: screens that can be seen by both auth and unauth will be here. 
@@ -190,6 +164,38 @@ export default function Navigator() {
   );
 }
 
+const DrawerNavigation = () => {
+  const user = useSelector((state) => state.user);
+  return (
+    <Drawer.Navigator
+      initialRouteName='Home'
+      drawerContent={(props) => <CustomDrawer {...props} />}
+      screenOptions={{
+        drawerActiveBackgroundColor: highlightColor,
+        drawerActiveTintColor: "#fff",
+      }}>
+      {user.gardens ? (
+        user.gardens.map((garden) => {
+          return (
+            <Drawer.Screen
+              key={garden.name}
+              name={garden.name}
+              component={Subnavigation}
+              options={{
+                ...headerStyle,
+              }}
+              initialParams={{ garden: garden }}></Drawer.Screen>
+          );
+        })
+      ) : (
+        <Drawer.Screen
+          key={"test"}
+          name={" "}
+          component={Spinner}></Drawer.Screen>
+      )}
+    </Drawer.Navigator>
+  );
+};
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -204,3 +210,12 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
 });
+const headerStyle = {
+  headerTintColor: "#ffffff",
+  headerStyle: {
+    backgroundColor: primaryDarkColor,
+  },
+  headerTitleStyle: {
+    fontSize: 18,
+  },
+};

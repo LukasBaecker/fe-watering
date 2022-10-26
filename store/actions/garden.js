@@ -6,3 +6,9 @@ export const setGarden = (garden) => {
     payload: { garden: garden },
   };
 };
+export const setJoinReq = (joinReqs) => {
+  return {
+    type: "SET_JOINREQ",
+    payload: { joinReqs: joinReqs },
+  };
+};

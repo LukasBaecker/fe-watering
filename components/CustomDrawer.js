@@ -5,6 +5,7 @@ import {
   ImageBackground,
   Image,
   TouchableOpacity,
+  StyleSheet,
 } from "react-native";
 import {
   DrawerContentScrollView,
@@ -66,26 +67,43 @@ const CustomDrawer = (props) => {
           <DrawerItemList {...props} />
         </View>
       </DrawerContentScrollView>
-      <View style={{ padding: 10, borderTopWidth: 1, borderTopColor: "#ccc" }}>
-        <TouchableOpacity
-          onPress={() => {
-            props.navigation.navigate("NewGarden");
-          }}
-          style={{ paddingVertical: 10 }}>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Ionicons name='add-circle-outline' size={22} />
-            <Text
-              style={{
-                fontSize: 15,
-                marginLeft: 5,
-              }}>
-              Neuen Garten anlegen
-            </Text>
-          </View>
-        </TouchableOpacity>
+      <View
+        style={{
+          paddingTop: 0,
+          flexDirection: "row",
+          alignItems: "center",
+        }}>
+        <View style={styles.bottomIconViews}>
+          <TouchableOpacity
+            onPress={() => {
+              props.navigation.navigate("SearchGarden");
+            }}
+            style={{ paddingVertical: 0 }}>
+            <Ionicons name='search-circle-outline' size={50} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.bottomIconViews}>
+          <TouchableOpacity
+            onPress={() => {
+              props.navigation.navigate("CreateGarden");
+            }}
+            style={{ paddingVertical: 0 }}>
+            <Ionicons name='add-circle-outline' size={50} />
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
 };
-
+const styles = StyleSheet.create({
+  bottomIconViews: {
+    height: "100%",
+    flex: 1,
+    alignItems: "center",
+    padding: 5,
+    borderWidth: 1,
+    borderColor: "#ccc",
+  },
+});
 export default CustomDrawer;
