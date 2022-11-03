@@ -2,7 +2,6 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableHighlight,
   View,
   SafeAreaView,
   Button,
@@ -32,18 +31,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { setStatus } from "../store/actions";
 
 /**
- * This screen is showing a simple search field to find existing gardens in the database
- * and send requests to join these gardens.
+ * This Screen is only for "owner" and "admin" of the current active garden
+ * This page shows a list of all the open joinRequests of the garden
+ * Owners and Admins can answer these requests and accept or deny requests
  * @param {*} props
  * @returns
  */
-const SearchGardenScreen = (props) => {
+const JoinRequestsScreen = (props) => {
   const dispatch = useDispatch();
   const [gardenName, setGardenName] = useState("");
-  //const [status, setStatus] = useState("idle");
   const user = useSelector((state) => state.user);
   const status = useSelector((state) => state.status);
-
   const sendJoinRequest = (gardenId) => {
     dispatch(setStatus("loading"));
     try {
@@ -56,6 +54,7 @@ const SearchGardenScreen = (props) => {
             .then(() => {
               // Add a new document in collection "gardens/{gardenId}/requests"
               var gardenRef = doc(db, "gardens", gardenId);
+              //var joinRef = collection(gardenRef, "joinRequests");
               setDoc(doc(gardenRef, "joinRequests", user.auth.uid), {
                 state: "pending",
               })
@@ -84,10 +83,12 @@ const SearchGardenScreen = (props) => {
         })
           .then(() => {
             // Add a new document in collection "gardens/{gardenId}/requests"
-            var gardenRef = doc(db, "gardens", gardenId);
-            setDoc(doc(gardenRef, "joinRequests", user.auth.uid), {
-              state: "pending",
-            })
+            setDoc(
+              doc(db, "gardens/" + gardenId + "/joinRequests", user.auth.uid),
+              {
+                state: "pending",
+              }
+            )
               .then(() => {
                 Alert.alert("Anfrage wurde gesendet.");
                 dispatch(setStatus("idle"));
@@ -174,20 +175,16 @@ const SearchGardenScreen = (props) => {
   }
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.logo}>Garten finden</Text>
+      <Text style={styles.logo}>Offene Anfragen</Text>
       <Text style={styles.text}>
-        Suche nach einem bereits existierenden Garten. Gibt dazu den exakten
-        Namen des Gartens ein.
+        Bearbeite hier offene Anfragen an deinen Garten.
       </Text>
       <View style={styles.form}>
-        <TextInput
-          style={styles.input}
-          placeholder='Gartenname'
-          placeholderTextColor='#fefefe'
-          autoCapitalize='none'
-          onChangeText={(text) => setGardenName(text)}
-          value={gardenName}
-        />
+        {/**
+         * TODO: hier werden die einzelnen Anfragen als Cards geladen
+         * Nutzername und vielleicht noch eine Nachricht
+         * und zwei schöne Buttons "annehemen" oder "ablehenen"
+         */}
       </View>
 
       <Button
@@ -234,4 +231,4 @@ const styles = StyleSheet.create({
   button: {},
 });
 
-export default SearchGardenScreen;
+export default JoinRequestsScreen;

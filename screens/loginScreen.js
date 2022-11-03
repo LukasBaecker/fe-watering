@@ -17,6 +17,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase-config";
 import Spinner from "../components/Spinner";
 import { highlightColor } from "../styles/colors";
+import { connectFirestoreEmulator } from "firebase/firestore";
 const LoginScreen = (props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,30 +46,6 @@ const LoginScreen = (props) => {
             }
           }
         });
-
-      /*
-      const response = await publicAxios.post("/user/login", {
-        email,
-        password,
-      });
-      console.log(response.data);
-      const { accessToken, refreshToken } = response.data;
-      console.log(authState);
-      //saving the tokens to the secured store
-      await SecureStore.setItemAsync(
-        "tokens",
-        JSON.stringify({
-          accessToken,
-          refreshToken,
-        })
-      );
-      //saving the tokens in context context
-
-      setAuthState({
-        accessToken: JSON.stringify(accessToken),
-        refreshToken: JSON.stringify(refreshToken),
-        authenticated: true,
-      });*/
     } catch (error) {
       console.log(error);
       //const errorCode = error.code;

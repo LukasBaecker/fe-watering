@@ -10,7 +10,7 @@ import expireReducer from "redux-persist-expire";
 const persistConfig = {
   key: "root",
   storage: AsyncStorage,
-  blacklist: ["user"],
+  blacklist: ["user", "status"],
   transforms: [
     // You can add more `expireReducer` calls here for different reducers
     // that you may want to expire

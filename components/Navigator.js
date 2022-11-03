@@ -25,7 +25,6 @@ import ResetPasswordScreen from "../screens/ResetPasswordScreen";
 import Subnavigation from "./Subnavigation";
 //Context Imports
 import { AuthContext } from "../context/AuthContext";
-import { UserContext } from "../context/UserContext";
 //authentication check
 import { onAuthStateChanged } from "firebase/auth";
 import app, { db } from "../firebase-config";
@@ -35,8 +34,9 @@ const auth = getAuth(app);
 import { useSelector, useDispatch } from "react-redux";
 import { setUser } from "../store/actions/user";
 import CustomDrawer from "./CustomDrawer";
-import CreateGarden from "../screens/CreateGardenScreen";
+import CreateGardenScreen from "../screens/CreateGardenScreen";
 import SearchGarden from "../screens/SearchGardenScreen";
+import NoGardenScreen from "../screens/NoGardenScreen";
 
 //create the Navigators
 const Stack = createNativeStackNavigator();
@@ -46,31 +46,41 @@ export default function Navigator() {
   const dispatch = useDispatch();
   const [authState, setAuthState] = useContext(AuthContext);
   const user = useSelector((state) => state.user);
-  //const [user, setUser] = useContext(UserContext);
+  const statusRedux = useSelector((state) => state.status);
   const [status, setStatus] = useState("loading");
-  //const [user, setUser] = useState({ name: null });
 
   const onAuthStateChange = (callback) => {
     setStatus("loading");
     return onAuthStateChanged(auth, (u) => {
       if (u) {
         const docRef = doc(db, "user", u.uid);
+        //get the additional userdata that is saved to the firestore referenced to the auth user's id
         getDoc(docRef).then((additionalUser) => {
-          //dispatch(callback({ ...user, auth: u, data: additionalUser.data() }));
-          const gardenList = additionalUser.data().gardens;
-          const q = query(
-            collection(db, "gardens"),
-            where("__name__", "in", gardenList)
-          );
-          getDocs(q).then((gardens) => {
-            const gardenArr = [];
-            gardens.forEach((g) => {
-              gardenArr.push({
-                name: g.data().name,
-                description: g.data().description,
-                roles: g.data().roles,
+          var gardenList = additionalUser.data().gardens;
+          var gardenArr = [];
+          if (gardenList.length > 0) {
+            const q = query(
+              collection(db, "gardens"),
+              where("__name__", "in", gardenList)
+            );
+            getDocs(q).then((gardens) => {
+              gardens.forEach((g) => {
+                gardenArr.push({
+                  name: g.data().name,
+                  description: g.data().description,
+                  roles: g.data().roles,
+                });
               });
+              dispatch(
+                callback({
+                  auth: u,
+                  data: additionalUser.data(),
+                  gardens: gardenArr,
+                })
+              );
+              setStatus("idle");
             });
+          } else {
             dispatch(
               callback({
                 auth: u,
@@ -79,19 +89,15 @@ export default function Navigator() {
               })
             );
             setStatus("idle");
-
-            /* gardens.forEach((g) => {
-              console.log("user.gardens:", user.gardens);
-              dispatch(
-                callback({ ...user, gardens: user.gardens.concat([g.data()]) })
-              );
-              console.log("gardens:", g.data());
-            });*/
-          });
+          }
         });
       } else {
         dispatch(
-          callback({ auth: {}, data: { firstname: "", name: "", gardens: [] } })
+          callback({
+            auth: {},
+            data: { firstname: "", name: "", gardens: [] },
+            gardens: [],
+          })
         );
         setAuthState({ auth: false, user: {} });
         setStatus("idle");
@@ -100,13 +106,15 @@ export default function Navigator() {
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChange(setUser);
-    return () => {
-      unsubscribe();
-    };
-  }, []);
+    if (statusRedux != "creatingNewUser") {
+      const unsubscribe = onAuthStateChange(setUser);
+      return () => {
+        unsubscribe();
+      };
+    }
+  }, [statusRedux]);
 
-  if (status === "loading") {
+  if (status === "loading" || statusRedux == "creatingNewUser") {
     return <Spinner />;
   }
 
@@ -147,7 +155,7 @@ export default function Navigator() {
             />
             <Stack.Screen
               name='CreateGarden'
-              component={CreateGarden}
+              component={CreateGardenScreen}
               options={{ headerShown: false }}
             />
           </Stack.Navigator>
@@ -175,18 +183,26 @@ const DrawerNavigation = () => {
         drawerActiveTintColor: "#fff",
       }}>
       {user.gardens ? (
-        user.gardens.map((garden) => {
-          return (
-            <Drawer.Screen
-              key={garden.name}
-              name={garden.name}
-              component={Subnavigation}
-              options={{
-                ...headerStyle,
-              }}
-              initialParams={{ garden: garden }}></Drawer.Screen>
-          );
-        })
+        user.data.gardens.length > 0 ? (
+          user.gardens.map((garden) => {
+            return (
+              <Drawer.Screen
+                key={garden.name}
+                name={garden.name}
+                component={Subnavigation}
+                options={{
+                  ...headerStyle,
+                }}
+                initialParams={{ garden: garden }}></Drawer.Screen>
+            );
+          })
+        ) : (
+          <Drawer.Screen
+            options={{ headerShown: false }}
+            key={"noGardenYet"}
+            name={"Kein Garten vorhanden"}
+            component={NoGardenScreen}></Drawer.Screen>
+        )
       ) : (
         <Drawer.Screen
           key={"test"}

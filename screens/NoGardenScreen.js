@@ -1,22 +1,32 @@
-import React, { useContext, useState } from "react";
-import { AuthContext } from "../context/AuthContext";
-import Spinner from "../components/Spinner";
+import React, { useContext, useState, useEffect } from "react";
 import {
-  Button,
   Alert,
+  Button,
   StyleSheet,
   SafeAreaView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { AuthContext } from "../context/AuthContext";
+import Spinner from "../components/Spinner";
+import * as SecureStore from "expo-secure-store";
+import { primaryDarkColor, dangerColor } from "../styles/colors";
+import { useDispatch, useSelector } from "react-redux";
+import { setJoinReq } from "../store/actions/garden";
+import { setStatus } from "../store/actions";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase-config";
-import { dangerColor, primaryDarkColor } from "../styles/colors";
-const UserScreen = () => {
+
+//TODO: Die Seite, welche geladen wird, wenn Nutzer*innen noch keinen Garten haben muss noch bearbeitet werden
+
+/**
+ * screen that is shown if the user got no garden.
+ * @returns
+ */
+const NoGardenScreen = () => {
+  const dispatch = useDispatch();
   const [authState, setAuthState] = useContext(AuthContext);
-  const [image, setImage] = useState("");
-  const [status, setStatus] = useState("idle");
 
   const logoutAlert = () => {
     Alert.alert("Wirklich ausloggen?", "", [
@@ -35,16 +45,12 @@ const UserScreen = () => {
   };
 
   const logout = async () => {
-    setStatus("loading");
+    dispatch(setStatus("loading"));
     signOut(auth).then((response) => {
       setAuthState({ auth: false, user: {} });
-      setStatus("idle");
+      dispatch(setStatus("idle"));
     });
   };
-
-  if (status === "loading") {
-    return <Spinner />;
-  }
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -62,9 +68,6 @@ const UserScreen = () => {
     </SafeAreaView>
   );
 };
-
-export default UserScreen;
-
 const styles = StyleSheet.create({
   container: {
     flexDirection: "column",
@@ -89,3 +92,5 @@ const styles = StyleSheet.create({
     padding: 15,
   },
 });
+
+export default NoGardenScreen;

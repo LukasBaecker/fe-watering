@@ -4,6 +4,7 @@ import {
   Image,
   StyleSheet,
   SafeAreaView,
+  TouchableOpacity,
   Platform,
   Text,
   StatusBar,
@@ -15,7 +16,27 @@ import * as SecureStore from "expo-secure-store";
 import { primaryDarkColor } from "../styles/colors";
 import { useDispatch, useSelector } from "react-redux";
 import { setJoinReq } from "../store/actions/garden";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import JoinRequestsScreen from "./JoinRequestsScreen";
 
+const Stack = createNativeStackNavigator();
+
+export const HomeScreenNavigation = () => {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        options={{ headerShown: false }}
+        name='Home'
+        component={HomeScreen}
+      />
+      <Stack.Screen
+        name='JoinRequests'
+        component={JoinRequestsScreen}
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
+  );
+};
 const HomeScreen = () => {
   const dispatch = useDispatch();
   const [authState, setAuthState] = useContext(AuthContext);
@@ -53,11 +74,19 @@ const HomeScreen = () => {
               return <Text key={garden.name}>{garden.name}</Text>;
             })}
           </View>
-          <View style={styles.view}>
-            {user.gardens.map((garden) => {
-              return <Text key={garden.name}>{garden.name}</Text>;
-            })}
+          <View style={styles.viewTwo}>
+            <TouchableOpacity>
+              <View style={styles.joinRequests}>
+                <Text>TEst this damn</Text>
+              </View>
+            </TouchableOpacity>
           </View>
+          {/**
+           * TODO: Die austehenden Anfragen könnte man erst als eine Zahl in einem Kasten machen und dann wenn man draufklickt in einem neuen Screen
+           * Hier werden diese einfach aufgelistet als Cards
+           * Nutzername und wie lange das her ist.
+           * Außerdem hat jede Karte die Knöpfe annehmen und Ablehnen
+           */}
         </>
       ) : (
         <></>
@@ -76,6 +105,17 @@ const styles = StyleSheet.create({
   },
   view: {
     flex: 1,
+  },
+  viewTwo: {
+    flex: 1,
+    width: "100%",
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+    flexDirection: "row",
+  },
+  joinRequests: {
+    flex: 1,
+    backgroundColor: "#ffffff",
   },
 });
 export default HomeScreen;
